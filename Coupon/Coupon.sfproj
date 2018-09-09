@@ -33,6 +33,9 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Gateway\Gateway.csproj" />
+    <ProjectReference Include="..\Offers\Offers.csproj" />
+    <ProjectReference Include="..\PyGoogleImg\PyGoogleImg.csproj" />
+    <ProjectReference Include="..\Register\Register.csproj" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
   <PropertyGroup>
