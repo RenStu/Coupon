@@ -1,0 +1,30 @@
+files - em ambiente de desenvolvimento
+- change-listener-pass.json -> arquivo utilizado pelo spiegel change-listener (contém user e pass da api/cmd)
+- local.ini -> arquivo com todas as configuraçõe do couchDB (normalmente localiizado em C:\CouchDB\etc)
+
+couchDB admin - em ambiente de desenvolvimento
+- admin
+- passw0rd
+
+spiegel install - em ambiente de desenvolvimento
+- spiegel --type="install" --url="http://admin:passw0rd@localhost:5984"
+- insert in spiegel database inside couchDB
+	{
+	  "_id": "all_userdb_on_change",
+	  "type": "on_change",
+	  "db_name": "^userdb-.+",
+	  "if": {
+		"Type": "^command"
+	  },
+	  "url": "http://admin@localhost:8635/api/cmd",
+	  "params": {
+		"Change": "$change",
+		"DbName": "$db_name"
+	  },
+	  "method": "POST",
+	  "debounce": true
+	}
+	
+	- spiegel --type="update-listener" --url="http://admin:passw0rd@localhost:5984"
+	- spiegel --type="change-listener" --url="http://admin:passw0rd@localhost:5984" --passwords-file=change-listener-pass.json
+

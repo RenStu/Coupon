@@ -5,11 +5,18 @@ VisualStudioVersion = 15.0.27703.2035
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{A07B5EB6-E848-4116-A8D0-A826331D98C6}") = "Coupon", "Coupon\Coupon.sfproj", "{C40216B9-2285-47C2-A1D5-B82E67E8B64B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gateway", "Gateway\Gateway.csproj", "{03C652E8-AC07-4EF9-8790-70A52B14A76C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gateway", "Gateway\Gateway.csproj", "{03C652E8-AC07-4EF9-8790-70A52B14A76C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApp.Client", "WebApp.Client\WebApp.Client.csproj", "{02BD34CC-0A57-4598-B410-CE5926B5E734}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApp.Client", "WebApp.Client\WebApp.Client.csproj", "{02BD34CC-0A57-4598-B410-CE5926B5E734}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApp.Shared", "WebApp.Shared\WebApp.Shared.csproj", "{826B2E08-FD7A-4723-91CA-C731EA6DFB1A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApp.Shared", "WebApp.Shared\WebApp.Shared.csproj", "{826B2E08-FD7A-4723-91CA-C731EA6DFB1A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Itens", "Solution Itens", "{81A83C66-76B9-47DB-A1B8-54FE433B3A19}"
+	ProjectSection(SolutionItems) = preProject
+		Solution Itens\change-listener-pass.json = Solution Itens\change-listener-pass.json
+		Solution Itens\files.txt = Solution Itens\files.txt
+		Solution Itens\local.ini = Solution Itens\local.ini
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
