@@ -15,4 +15,8 @@
     <ProjectReference Include="..\WebApp.Shared\WebApp.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\script\" />
+  </ItemGroup>
+
 </Project>
