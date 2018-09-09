@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Offers.Controllers
@@ -9,6 +10,12 @@ namespace Offers.Controllers
     [Route("api/[controller]")]
     public class ValuesController : Controller
     {
+        private readonly IMediator mediator;
+
+        public ValuesController(IMediator mediator)
+        {
+            this.mediator = mediator;
+        }
         // GET api/values
         [HttpGet]
         public IEnumerable<string> Get()

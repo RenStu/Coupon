@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Gateway.Controllers
 {
     [Route("api/[controller]")]
-    public class ValuesController : Controller
+    public class ValuesController : BaseController
     {
         // GET api/values
         [HttpGet]
@@ -20,7 +21,17 @@ namespace Gateway.Controllers
         [HttpGet("{id}")]
         public string Get(int id)
         {
-            return "value";
+            //return "value";
+
+            HttpResponseMessage response = null;
+            using (var client = new HttpClient())
+            {
+                var offersEndPoint = GetEndPoint("fabric:/Coupon/Offers");
+                response = client.GetAsync($"{offersEndPoint}/api/values/5").Result;
+            }
+
+            var value = response.Content.ReadAsStringAsync().Result;
+            return value;
         }
 
         // POST api/values
