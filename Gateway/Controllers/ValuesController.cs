@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Shared;
 
 namespace Gateway.Controllers
 {
@@ -23,15 +24,24 @@ namespace Gateway.Controllers
         {
             //return "value";
 
+            var command = new Command
+            {
+                Change = new Change {
+                    CommandName = "Commands.GoogleSearch",
+                    CommandJSON = "{ \"Search\" : \"cats\" }",
+                    Service = "PyGoogleImg"
+                }
+            };
+
             HttpResponseMessage response = null;
             using (var client = new HttpClient())
             {
-                var offersEndPoint = GetEndPoint("fabric:/Coupon/Offers");
-                response = client.GetAsync($"{offersEndPoint}/api/values/5").Result;
+                var serviceEndPoint = GetEndPoint($"fabric:/Coupon/{command.Change.Service}");
+                response = client.PostAsJsonAsync($"{serviceEndPoint}/api/values", command).Result;
             }
 
-            var value = response.Content.ReadAsStringAsync().Result;
-            return value;
+            //var value = response.Content.ReadAsStringAsync().Result;
+            return id.ToString();
         }
 
         // POST api/values
