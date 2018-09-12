@@ -37,7 +37,7 @@ namespace Gateway.Controllers
             using (var client = new HttpClient())
             {
                 var serviceEndPoint = GetEndPoint($"fabric:/Coupon/{command.Change.Service}");
-                response = client.PostAsJsonAsync($"{serviceEndPoint}/api/values", command).Result;
+                response = client.PostAsJsonAsync($"{serviceEndPoint}/api/cmd", command).Result;
             }
 
             //var value = response.Content.ReadAsStringAsync().Result;

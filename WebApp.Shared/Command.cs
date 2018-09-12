@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Shared
 {
-    public class Command
+    public class Command : BaseDocument
     {
 
         public Change Change { get; set; }
@@ -12,12 +12,8 @@ namespace Shared
         public string DbName { get; set; }
     }
 
-    public class Change
+    public class Change : BaseDocument
     {
-        public string _id { get; set; }
-
-        public string _rev { get; set; }
-
         public string Type { get; set; }
 
         public string Service { get; set; }
