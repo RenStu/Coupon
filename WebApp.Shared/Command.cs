@@ -9,7 +9,6 @@ namespace Shared
 
         public Change Change { get; set; }
 
-        public string DbName { get; set; }
     }
 
     public class Change : BaseDocument

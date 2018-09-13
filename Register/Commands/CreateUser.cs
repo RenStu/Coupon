@@ -15,6 +15,8 @@ namespace Commands
 
         public string Password { get; set; }
 
+        public string Location { get; set; }
+
         public string Type { get { return "user"; } }
 
         public string[] Roles { get; set; }

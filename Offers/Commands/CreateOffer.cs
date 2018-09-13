@@ -15,6 +15,8 @@ namespace Commands
         }
         public string Name { get; set; }
 
+        public string Location { get; set; }
+
         public DateTime EffectiveStartDate { get; set; }
 
         public DateTime EffectiveEndDate { get; set; }
