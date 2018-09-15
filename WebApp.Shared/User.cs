@@ -14,11 +14,9 @@ namespace Shared
 
         public string Location { get; set; }
 
-        public string Type { get { return "user"; } }
-
         public string[] Roles { get; set; }
 
-        public string IsShopkeeper { get; set; }
+        public bool IsShopkeeper { get; set; }
 
         public string ShopName { get; set; }
     }

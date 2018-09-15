@@ -13,12 +13,10 @@ namespace Shared
 
     public class Change : BaseDocument
     {
-        public string Type { get; set; }
-
         public string Service { get; set; }
 
-        public string CommandName { get; set; }
-
         public string CommandJSON { get; set; }
+
+        public string CommandName { get; set; }
     }
 }

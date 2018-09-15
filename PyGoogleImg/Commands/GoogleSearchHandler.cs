@@ -1,7 +1,11 @@
 ﻿using Commands;
+using CouchDB.Client;
 using IronPython.Hosting;
 using IronPython.Runtime;
 using MediatR;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +19,6 @@ namespace PyGoogleImg.Commands
         {
             var _engine = Python.CreateEngine();
             var searchPaths = _engine.GetSearchPaths();
-            //searchPaths.Add(@"C:\IronPython\Lib");
             searchPaths.Add(@"C:\Python27\Lib");
             searchPaths.Add(@"C:\Python27\Lib\site-packages");
             _engine.SetSearchPaths(searchPaths);
@@ -58,14 +61,27 @@ def main(args):
 main(argv)
 ", _scope);
 
-            //pythonResult.Dump();
             var listLinkType = new List<Tuple<string, string>>();
             foreach (PythonTuple element in pythonResult)
                 listLinkType.Add(new Tuple<string, string>(element.First().ToString(), element.Last().ToString()));
 
             var list = listLinkType.Select(x => x.Item1).Take(5);
 
-            //return list;
+            var couchDB = new CouchClient(Couch.EndPoint);
+            var dbUser = couchDB.GetDatabaseAsync(request.DbName).Result;
+            var googleSearchImg = dbUser.GetAsync("googleSearchImg").Result;
+            if (googleSearchImg.StatusCode == System.Net.HttpStatusCode.OK) {
+                var googleSearchImgObj = JsonConvert.DeserializeObject<GoogleSearchImg>(googleSearchImg.Content);
+                googleSearchImgObj.ListUrlImages = list.ToArray();
+                dbUser.ForceUpdateAsync(JToken.FromObject(googleSearchImgObj));
+            } else {
+                var googleSearchImgObj = new GoogleSearchImg();
+                googleSearchImgObj._id = "googleSearchImg";
+                googleSearchImgObj.DbName = request.DbName;
+                googleSearchImgObj.CqrsType = Cqrs.Query;
+                googleSearchImgObj.ListUrlImages = list.ToArray();
+                dbUser.InsertAsync(googleSearchImgObj);
+            }
         }
     }
 }

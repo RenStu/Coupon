@@ -19,6 +19,8 @@ namespace Shared
 
         public bool IsCoupon { get; set; }
 
+        public int AmountCoupon { get; set; }
+
         public ICollection<UserCoupon> ListUserCoupon { get; set; }
     }
 }

@@ -8,7 +8,7 @@ namespace Shared
     {
         public string UserEmail { get; set; }
 
-        public bool InStock { get; set; }
+        public bool? InStock { get; set; }
 
         public bool IsDelivered { get; set; }
 

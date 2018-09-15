@@ -16,25 +16,38 @@ namespace Offers.Commands
         protected override void Handle(CreateOffer request)
         {
             var offerObj = JsonConvert.DeserializeObject<Offer>(JsonConvert.SerializeObject(request));
+            offerObj.CqrsType = Cqrs.Query;
+            offerObj.ListProduct.ToList().ForEach(x =>
+            {
+                x.Guid = Guid.NewGuid().ToString();
+            });
+
             if (offerObj.EffectiveStartDate < offerObj.EffectiveEndDate && offerObj.EffectiveEndDate > DateTime.Now)
             {
-                var couchDB = new CouchClient("");
-                var dbOffers = couchDB.GetDatabaseAsync("Offers").Result;
-                var dbUsers = couchDB.GetDatabaseAsync("_users").Result;
-                var userDB_ = couchDB.GetDatabaseAsync(request.DbName).Result;
+                var couchDB = new CouchClient(Couch.EndPoint);
+                var dbOffers = couchDB.GetDatabaseAsync(Couch.DBOffers).Result;
+                var dbUsers = couchDB.GetDatabaseAsync(Couch.DBUsers).Result;
+                var dbUser = couchDB.GetDatabaseAsync(request.DbName).Result;
                 var userObj = JsonConvert.DeserializeObject<User>(
-                    userDB_.GetAsync("org.couchdb.user:" + request.DbName.Substring(7).HexToString()).Result.Content);
-                userDB_.InsertAsync(offerObj);
+                    dbUser.GetAsync("org.couchdb.user:" + request.DbName.ToUserName()).Result.Content);
 
-                var users = JsonConvert.DeserializeObject<List<User>>(
-                    dbUsers.SelectAsync(new FindBuilder().Selector("Location", SelectorOperator.Equals, userObj.Location))
-                .Result.Content);
-                if (users.Any())
+                if (userObj.IsShopkeeper)
                 {
-                    foreach (var user in users)
+                    dbUser.InsertAsync(offerObj);
+
+                    var users = JsonConvert.DeserializeObject<List<User>>(
+                        dbUsers.SelectAsync(new FindBuilder().Selector("Location", SelectorOperator.Equals, userObj.Location))
+                    .Result.Content);
+                    if (users.Any())
                     {
-                        userDB_ = couchDB.GetDatabaseAsync(user.DbName).Result;
-                        userDB_.InsertAsync(offerObj);
+                        foreach (var user in users)
+                        {
+                            if (user.Email.Equals(userObj.Email, StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                dbUser = couchDB.GetDatabaseAsync(user.DbName).Result;
+                                dbUser.InsertAsync(offerObj);
+                            }
+                        }
                     }
                 }
             }
