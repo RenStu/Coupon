@@ -24,10 +24,9 @@ namespace Offers.Commands
 
             if (offerObj.EffectiveStartDate < offerObj.EffectiveEndDate && offerObj.EffectiveEndDate > DateTime.Now)
             {
-                var couchDB = new CouchClient(Couch.EndPoint);
-                var dbOffers = couchDB.GetDatabaseAsync(Couch.DBOffers).Result;
-                var dbUsers = couchDB.GetDatabaseAsync(Couch.DBUsers).Result;
-                var dbUser = couchDB.GetDatabaseAsync(request.DbName).Result;
+                var dbOffers = new CouchClient(Couch.EndPoint).GetDatabaseAsync(Couch.DBOffers).Result;
+                var dbUsers = new CouchClient(Couch.EndPoint).GetDatabaseAsync(Couch.DBUsers).Result;
+                var dbUser = new CouchClient(Couch.EndPoint).GetDatabaseAsync(request.DbName).Result;
                 var userObj = JsonConvert.DeserializeObject<User>(
                     dbUser.GetAsync("org.couchdb.user:" + request.DbName.ToUserName()).Result.Content);
 
@@ -35,16 +34,15 @@ namespace Offers.Commands
                 {
                     dbUser.InsertAsync(offerObj);
 
-                    var users = JsonConvert.DeserializeObject<List<User>>(
-                        dbUsers.SelectAsync(new FindBuilder().Selector("Location", SelectorOperator.Equals, userObj.Location))
-                    .Result.Content);
+                    var users = dbUsers.SelectAsync(new FindBuilder().Selector("Location", SelectorOperator.Equals, userObj.Location))
+                    .Result.Dynamic.docs.ToObject<List<User>>();
                     if (users.Any())
                     {
                         foreach (var user in users)
                         {
                             if (user.Email.Equals(userObj.Email, StringComparison.InvariantCultureIgnoreCase))
                             {
-                                dbUser = couchDB.GetDatabaseAsync(user.DbName).Result;
+                                dbUser = new CouchClient(Couch.EndPoint).GetDatabaseAsync(user.DbName).Result;
                                 dbUser.InsertAsync(offerObj);
                             }
                         }

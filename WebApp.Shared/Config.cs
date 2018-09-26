@@ -30,7 +30,7 @@ namespace Shared
 
         public static string DBUsers { get { return "_users"; } }
 
-        public static string DBOffers { get { return "Offers"; } }
+        public static string DBOffers { get { return "offers"; } }
     }
 
     public class CouchValue

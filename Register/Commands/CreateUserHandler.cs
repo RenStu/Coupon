@@ -3,6 +3,7 @@ using CouchDB.Client;
 using CouchDB.Client.FluentMango;
 using MediatR;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Shared;
 using System;
 using System.Collections.Generic;
@@ -16,28 +17,27 @@ namespace Register.Commands
     {
         protected override HttpStatusCode Handle(CreateUser request)
         {
-            var couchDB = new CouchClient(Couch.EndPoint);
-            var dbUsers = couchDB.GetDatabaseAsync(Couch.DBUsers).Result;
+            var dbUsers = new CouchClient(Couch.EndPoint).GetDatabaseAsync(Couch.DBUsers).Result;
             var user = JsonConvert.DeserializeObject<User>(dbUsers.GetAsync(request._id).Result.Content);
 
             if (user._id == null) {
                 var userObj = JsonConvert.DeserializeObject<User>(JsonConvert.SerializeObject(request));
                 userObj.CqrsType = Cqrs.Query;
-                userObj.DbName = $"usersdb-{userObj.Email.StringToHex()}";
+                userObj.DbName = $"userdb-{userObj.Email.StringToHex()}";
                 userObj.Roles = new string[] { };
-                userObj.type = "user";
-                var result = dbUsers.InsertAsync(userObj).Result;
-                if (result.StatusCode == HttpStatusCode.OK)
+                userObj.Type = "user";
+                var result = dbUsers.UpdateAsync(JToken.FromObject(userObj)).Result;
+
+                if (result.StatusCode == HttpStatusCode.Created)
                 {
-                    var dbOffers = couchDB.GetDatabaseAsync(Couch.DBOffers).Result;
-                    var offers = JsonConvert.DeserializeObject<List<Offer>>(
-                        dbOffers.SelectAsync(new FindBuilder().Selector("Location", SelectorOperator.Equals, userObj.Location))
-                    .Result.Content);
+                    var dbOffers = new CouchClient(Couch.EndPoint).GetDatabaseAsync(Couch.DBOffers).Result;
+                    var offers = dbOffers.SelectAsync(new FindBuilder().Selector("Location", SelectorOperator.Equals, userObj.Location))
+                    .Result.Dynamic.docs.ToObject<List<Offer>>();
 
-                    var dbUser = couchDB.GetDatabaseAsync(userObj.DbName).Result;
-                    dbUser.InsertAsync(userObj);
+                    var dbUser = new CouchClient(Couch.EndPoint).GetDatabaseAsync(userObj.DbName).Result;
+                    dbUser.ForceUpdateAsync(JToken.FromObject(userObj));
 
-                    if (offers.Any())
+                    if (offers.Count > 0)
                         dbUser.BulkInsertAsync(offers.ToArray());
                 }
 

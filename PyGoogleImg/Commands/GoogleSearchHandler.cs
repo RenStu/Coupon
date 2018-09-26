@@ -67,8 +67,7 @@ main(argv)
 
             var list = listLinkType.Select(x => x.Item1).Take(5);
 
-            var couchDB = new CouchClient(Couch.EndPoint);
-            var dbUser = couchDB.GetDatabaseAsync(request.DbName).Result;
+            var dbUser = new CouchClient(Couch.EndPoint).GetDatabaseAsync(request.DbName).Result;
             var googleSearchImg = dbUser.GetAsync("googleSearchImg").Result;
             if (googleSearchImg.StatusCode == System.Net.HttpStatusCode.OK) {
                 var googleSearchImgObj = JsonConvert.DeserializeObject<GoogleSearchImg>(googleSearchImg.Content);
@@ -80,7 +79,7 @@ main(argv)
                 googleSearchImgObj.DbName = request.DbName;
                 googleSearchImgObj.CqrsType = Cqrs.Query;
                 googleSearchImgObj.ListUrlImages = list.ToArray();
-                dbUser.InsertAsync(googleSearchImgObj);
+                dbUser.ForceUpdateAsync(JToken.FromObject(googleSearchImgObj));
             }
         }
     }

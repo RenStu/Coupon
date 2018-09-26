@@ -16,8 +16,7 @@ namespace Offers.Commands
     {
         protected override void Handle(Cancelled request)
         {
-            var couchDB = new CouchClient(Couch.EndPoint);
-            var dbOffers = couchDB.GetDatabaseAsync(Couch.DBOffers).Result;
+            var dbOffers = new CouchClient(Couch.EndPoint).GetDatabaseAsync(Couch.DBOffers).Result;
             var offer = JsonConvert.DeserializeObject<Offer>(dbOffers.GetAsync(request.IdOffer).Result.Content);
             if (offer._id != null)
             {
@@ -29,19 +28,18 @@ namespace Offers.Commands
                     });
                 });
 
-                var userDB_ = couchDB.GetDatabaseAsync(request.DbName).Result;
+                var userDB_ = new CouchClient(Couch.EndPoint).GetDatabaseAsync(request.DbName).Result;
                 userDB_.ForceUpdateAsync(JToken.FromObject(offer));
 
-                var dbUsers = couchDB.GetDatabaseAsync(Couch.DBUsers).Result;
-                var users = JsonConvert.DeserializeObject<List<User>>(
-                    dbUsers.SelectAsync(new FindBuilder().Selector("Location", SelectorOperator.Equals, offer.Location))
-                .Result.Content);
+                var dbUsers = new CouchClient(Couch.EndPoint).GetDatabaseAsync(Couch.DBUsers).Result;
+                var users = dbUsers.SelectAsync(new FindBuilder().Selector("Location", SelectorOperator.Equals, offer.Location))
+                .Result.Dynamic.docs.ToObject<List<User>>();
 
                 foreach (var user in users)
                 {
                     if (user.Email.Equals(request.UserEmail, StringComparison.InvariantCultureIgnoreCase))
                     {
-                        userDB_ = couchDB.GetDatabaseAsync(user.DbName).Result;
+                        userDB_ = new CouchClient(Couch.EndPoint).GetDatabaseAsync(user.DbName).Result;
                         userDB_.ForceUpdateAsync(JToken.FromObject(offer));
                     }
                 }

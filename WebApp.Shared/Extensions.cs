@@ -19,7 +19,7 @@ namespace Shared
 
         public static string StringToHex(this string input)
         {
-            return String.Join("", input.Select(c => ((int)c).ToString("X2")));
+            return String.Join("", input.Select(c => ((int)c).ToString("x2")));
         }
 
         public static string ToUserName(this string input)

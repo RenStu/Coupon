@@ -12,7 +12,7 @@ namespace Shared
 
         public string DbName { get; set; }
 
-        public string type
+        public string Type
         {
             get { return string.IsNullOrEmpty(_Type) ? this.GetType().Name : _Type; }
             set { _Type = value; }
