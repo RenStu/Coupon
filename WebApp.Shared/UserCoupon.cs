@@ -13,5 +13,7 @@ namespace Shared
         public bool IsDelivered { get; set; }
 
         public bool IsCancelled { get; set; }
+
+        public bool IsOutOfRange { get; set; }
     }
 }

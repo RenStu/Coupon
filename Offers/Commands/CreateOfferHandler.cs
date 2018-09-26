@@ -3,6 +3,7 @@ using CouchDB.Client;
 using CouchDB.Client.FluentMango;
 using MediatR;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Shared;
 using System;
 using System.Collections.Generic;
@@ -32,10 +33,11 @@ namespace Offers.Commands
 
                 if (userObj.IsShopkeeper)
                 {
-                    dbUser.InsertAsync(offerObj);
+                    dbOffers.ForceUpdateAsync(JToken.FromObject(offerObj));
+                    dbUser.ForceUpdateAsync(JToken.FromObject(offerObj));
 
                     var users = dbUsers.SelectAsync(new FindBuilder().Selector("Location", SelectorOperator.Equals, userObj.Location))
-                    .Result.Dynamic.docs.ToObject<List<User>>();
+                        .Result.Docs.ToObject<List<User>>();
                     if (users.Any())
                     {
                         foreach (var user in users)
@@ -43,7 +45,7 @@ namespace Offers.Commands
                             if (user.Email.Equals(userObj.Email, StringComparison.InvariantCultureIgnoreCase))
                             {
                                 dbUser = new CouchClient(Couch.EndPoint).GetDatabaseAsync(user.DbName).Result;
-                                dbUser.InsertAsync(offerObj);
+                                dbUser.ForceUpdateAsync(JToken.FromObject(offerObj));
                             }
                         }
                     }

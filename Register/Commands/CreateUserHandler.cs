@@ -32,12 +32,12 @@ namespace Register.Commands
                 {
                     var dbOffers = new CouchClient(Couch.EndPoint).GetDatabaseAsync(Couch.DBOffers).Result;
                     var offers = dbOffers.SelectAsync(new FindBuilder().Selector("Location", SelectorOperator.Equals, userObj.Location))
-                    .Result.Dynamic.docs.ToObject<List<Offer>>();
+                        .Result.Docs.ToObject<List<Offer>>();
 
                     var dbUser = new CouchClient(Couch.EndPoint).GetDatabaseAsync(userObj.DbName).Result;
                     dbUser.ForceUpdateAsync(JToken.FromObject(userObj));
 
-                    if (offers.Count > 0)
+                    if (offers.Any())
                         dbUser.BulkInsertAsync(offers.ToArray());
                 }
 

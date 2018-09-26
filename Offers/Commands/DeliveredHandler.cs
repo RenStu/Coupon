@@ -17,7 +17,9 @@ namespace Offers.Commands
         protected override void Handle(Delivered request)
         {
             var dbOffers = new CouchClient(Couch.EndPoint).GetDatabaseAsync(Couch.DBOffers).Result;
-            var offer = JsonConvert.DeserializeObject<Offer>(dbOffers.GetAsync(request.IdOffer).Result.Content);
+            var jTOffer = dbOffers.GetAsync(request.IdOffer).Result.Json;
+            var offer = jTOffer.ToObject<Offer>();
+
             if (offer._id != null)
             {
                 offer.ListProduct.Where(x => x.Guid.Equals(request.GuidProduct)).ToList().ForEach(x =>
@@ -28,12 +30,15 @@ namespace Offers.Commands
                     });
                 });
 
+                var offerToken = JToken.FromObject(offer)["_rev"] = jTOffer["_rev"];
+                UpdateWithMergeConflicts(offerToken, dbOffers);
+
                 var userDB_ = new CouchClient(Couch.EndPoint).GetDatabaseAsync(request.DbName).Result;
                 userDB_.ForceUpdateAsync(JToken.FromObject(offer));
 
                 var dbUsers = new CouchClient(Couch.EndPoint).GetDatabaseAsync(Couch.DBUsers).Result;
                 var users = dbUsers.SelectAsync(new FindBuilder().Selector("Location", SelectorOperator.Equals, offer.Location))
-                .Result.Dynamic.docs.ToObject<List<User>>();
+                    .Result.Docs.ToObject<List<User>>();
 
                 foreach (var user in users)
                 {
@@ -43,6 +48,25 @@ namespace Offers.Commands
                         userDB_.ForceUpdateAsync(JToken.FromObject(offer));
                     }
                 }
+            }
+        }
+
+        protected void UpdateWithMergeConflicts(JToken offer, CouchDatabase dbOffers)
+        {
+            var result = dbOffers.UpdateAsync(offer).Result;
+
+            if (result.StatusCode == System.Net.HttpStatusCode.Conflict)
+            {
+                var offerNewer = dbOffers.GetAsync(offer.GetString("_id")).Result.Json;
+                var jOffer = JObject.Parse(JsonConvert.SerializeObject(offerNewer));
+                var jOfferNewer = JObject.Parse(JsonConvert.SerializeObject(offerNewer));
+
+                jOffer.Merge(jOfferNewer, new JsonMergeSettings
+                {
+                    MergeArrayHandling = MergeArrayHandling.Merge
+                });
+
+                UpdateWithMergeConflicts(offer, dbOffers);
             }
         }
     }

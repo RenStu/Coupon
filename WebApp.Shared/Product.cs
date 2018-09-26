@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Shared
@@ -20,6 +21,15 @@ namespace Shared
         public bool IsCoupon { get; set; }
 
         public int AmountCoupon { get; set; }
+
+        public int RemainingCoupon
+        {
+            get
+            {
+                ListUserCoupon.Skip(AmountCoupon).ToList().ForEach(x => { x.IsOutOfRange = true; });
+                return AmountCoupon - ListUserCoupon.Take(AmountCoupon).Count();
+            }
+        }
 
         public ICollection<UserCoupon> ListUserCoupon { get; set; }
     }
