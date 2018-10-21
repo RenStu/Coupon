@@ -23,7 +23,7 @@ namespace Offers.Commands
                 x.Guid = Guid.NewGuid().ToString();
             });
 
-            if (offerObj.EffectiveStartDate < offerObj.EffectiveEndDate && offerObj.EffectiveEndDate > DateTime.Now)
+            if (offerObj.EffectiveStartDate < offerObj.EffectiveEndDate)
             {
                 var dbOffers = new CouchClient(Couch.EndPoint).GetDatabaseAsync(Couch.DBOffers).Result;
                 var dbUsers = new CouchClient(Couch.EndPoint).GetDatabaseAsync(Couch.DBUsers).Result;
@@ -36,13 +36,13 @@ namespace Offers.Commands
                     dbOffers.ForceUpdateAsync(JToken.FromObject(offerObj));
                     dbUser.ForceUpdateAsync(JToken.FromObject(offerObj));
 
-                    var users = dbUsers.SelectAsync(new FindBuilder().Selector("Location", SelectorOperator.Equals, userObj.Location))
+                    var users = dbUsers.SelectAsync(new FindBuilder().Selector("location", SelectorOperator.Equals, userObj.Location))
                         .Result.Docs.ToObject<List<User>>();
                     if (users.Any())
                     {
                         foreach (var user in users)
                         {
-                            if (user.Email.Equals(userObj.Email, StringComparison.InvariantCultureIgnoreCase))
+                            if (!user.Email.Equals(userObj.Email, StringComparison.InvariantCultureIgnoreCase))
                             {
                                 dbUser = new CouchClient(Couch.EndPoint).GetDatabaseAsync(user.DbName).Result;
                                 dbUser.ForceUpdateAsync(JToken.FromObject(offerObj));

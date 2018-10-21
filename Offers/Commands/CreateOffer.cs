@@ -17,6 +17,10 @@ namespace Commands
 
         public string Location { get; set; }
 
+        public string ShopName { get; set; }
+
+        public string UserShopEmail { get; set; }
+
         public DateTime EffectiveStartDate { get; set; }
 
         public DateTime EffectiveEndDate { get; set; }

@@ -4,6 +4,7 @@ using Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -20,11 +21,19 @@ namespace Gateway.Controllers
             HttpResponseMessage response = null;
             using (var client = new HttpClient())
             {
-                var serviceEndPoint = GetEndPoint($"fabric:/Coupon/{command.Change.Service}");
-                response = client.PostAsJsonAsync($"{serviceEndPoint}/api/cmd", command).Result;
+                try
+                {
+                    var serviceEndPoint = GetEndPoint($"fabric:/Coupon/{command.Change.Service}");
+                    response = client.PostAsJsonAsync($"{serviceEndPoint}/api/cmd", command).Result;
+                }
+                catch (Exception)
+                {
+                    //log
+                }
+                
             }
 
-            return new HttpResponseMessage(response.StatusCode);
+            return new HttpResponseMessage(response != null ? response.StatusCode : HttpStatusCode.InternalServerError);
         }
     }
 }

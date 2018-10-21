@@ -31,7 +31,7 @@ namespace Register.Commands
                 if (result.StatusCode == HttpStatusCode.Created)
                 {
                     var dbOffers = new CouchClient(Couch.EndPoint).GetDatabaseAsync(Couch.DBOffers).Result;
-                    var offers = dbOffers.SelectAsync(new FindBuilder().Selector("Location", SelectorOperator.Equals, userObj.Location))
+                    var offers = dbOffers.SelectAsync(new FindBuilder().Selector("location", SelectorOperator.Equals, userObj.Location))
                         .Result.Docs.ToObject<List<Offer>>();
 
                     var dbUser = new CouchClient(Couch.EndPoint).GetDatabaseAsync(userObj.DbName).Result;

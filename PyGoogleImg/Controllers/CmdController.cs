@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -24,7 +26,7 @@ namespace PyGoogleImg.Controllers
         
         // POST api/values
         [HttpPost]
-        public void Post([FromBody]Command command)
+        public HttpResponseMessage Post([FromBody]Command command)
         {
 
             JObject commandOject = JObject.Parse(JsonConvert.SerializeObject(command));
@@ -38,7 +40,9 @@ namespace PyGoogleImg.Controllers
             var commandType = Type.GetType(command.Change.CommandName);
             var commandObj = commandOject.ToObject(commandType);
 
-            var response = mediator.Send((IRequest)commandObj);
+            var response = mediator.Send((IRequest<HttpStatusCode>)commandObj).Result;
+
+            return new HttpResponseMessage(response);
 
         }
 

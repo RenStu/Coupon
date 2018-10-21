@@ -24,7 +24,7 @@ namespace Shared
 
     public static class Cqrs
     {
-        public static string Command { get { return "commnad"; } }
+        public static string Command { get { return "command"; } }
 
         public static string Query { get { return "query"; } }
     }

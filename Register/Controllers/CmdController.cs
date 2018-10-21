@@ -39,9 +39,9 @@ namespace Register.Controllers
             var commandType = Type.GetType(command.Change.CommandName);
             var commandObj = commandOject.ToObject(commandType);
 
-            var response = mediator.Send((IRequest<HttpStatusCode>)commandObj);
+            var response = mediator.Send((IRequest<HttpStatusCode>)commandObj).Result;
 
-            return new HttpResponseMessage(response.Result);
+            return new HttpResponseMessage(response);
 
         }
 

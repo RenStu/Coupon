@@ -16,6 +16,8 @@ namespace Shared
 
         public string Name { get; set; }
 
+        public string Image { get; set; }
+
         public Decimal Value { get; set; }
 
         public bool IsCoupon { get; set; }

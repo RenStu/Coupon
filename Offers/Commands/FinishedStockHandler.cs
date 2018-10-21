@@ -30,19 +30,20 @@ namespace Offers.Commands
                     });
                 });
 
-                var offerToken = JToken.FromObject(offer)["_rev"] = jTOffer["_rev"];
+                var offerToken = JToken.FromObject(offer);
+                offerToken["_rev"] = jTOffer["_rev"].ToString();
                 UpdateWithMergeConflicts(offerToken, dbOffers);
 
                 var userDB_ = new CouchClient(Couch.EndPoint).GetDatabaseAsync(request.DbName).Result;
                 userDB_.ForceUpdateAsync(JToken.FromObject(offer));
 
                 var dbUsers = new CouchClient(Couch.EndPoint).GetDatabaseAsync(Couch.DBUsers).Result;
-                var users = dbUsers.SelectAsync(new FindBuilder().Selector("Location", SelectorOperator.Equals, offer.Location))
+                var users = dbUsers.SelectAsync(new FindBuilder().Selector("location", SelectorOperator.Equals, offer.Location))
                     .Result.Docs.ToObject<List<User>>();
 
                 foreach (var user in users)
                 {
-                    if (user.Email.Equals(request.UserEmail, StringComparison.InvariantCultureIgnoreCase))
+                    if (!user.Email.Equals(request.UserEmail, StringComparison.InvariantCultureIgnoreCase))
                     {
                         userDB_ = new CouchClient(Couch.EndPoint).GetDatabaseAsync(user.DbName).Result;
                         userDB_.ForceUpdateAsync(JToken.FromObject(offer));
@@ -58,13 +59,23 @@ namespace Offers.Commands
             if (result.StatusCode == System.Net.HttpStatusCode.Conflict)
             {
                 var offerNewer = dbOffers.GetAsync(offer.GetString("_id")).Result.Json;
-                var jOffer = JObject.Parse(JsonConvert.SerializeObject(offerNewer));
-                var jOfferNewer = JObject.Parse(JsonConvert.SerializeObject(offerNewer));
 
-                jOffer.Merge(jOfferNewer, new JsonMergeSettings
-                {
-                    MergeArrayHandling = MergeArrayHandling.Merge
+                var offerObje = offer.ToObject<Offer>();
+                var offerNewerObj = offer.ToObject<Offer>();
+
+                offerObje.ListProduct.ToList().ForEach(x => {
+                    if (offerNewerObj.ListProduct.FirstOrDefault(y => y.Guid == x.Guid) != null)
+                        x.ListUserCoupon = x.ListUserCoupon.Concat(offerNewerObj.ListProduct.FirstOrDefault(y => y.Guid == x.Guid).ListUserCoupon)
+                            .GroupBy(y => y.UserEmail)
+                            .Select(y => y
+                            .OrderBy(z => z.IsDelivered)
+                            .ThenByDescending(z => z.DateChange)
+                            .First()).ToList();
                 });
+                offerObje.ListProduct.Union(offerNewerObj.ListProduct).GroupBy(x => x.Guid).Select(x => x.First()).ToList();
+
+                offer = JToken.FromObject(offerObje);
+                offer["_rev"] = offerNewer["_rev"];
 
                 UpdateWithMergeConflicts(offer, dbOffers);
             }
