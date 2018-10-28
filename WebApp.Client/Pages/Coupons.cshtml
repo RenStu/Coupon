@@ -1,0 +1,23 @@
+﻿@page "/coupons"
+
+<div class="content px-4">
+    <h2>Coupons Offered</h2>
+    <hr class="colorgraph">
+    <div class="table-responsive">
+        <table class="table table-striped" style="width:100%" id="tableCouponsOffered"></table>
+    </div>
+
+    <h2>My Coupons</h2>
+    <hr class="colorgraph">
+    <div class="table-responsive">
+        <table class="table table-striped" style="width:100%" id="tableMyCoupons"></table>
+    </div>
+</div>
+
+@functions{
+
+    protected override async Task OnAfterRenderAsync()
+    {
+        await WebApp.Client.Services.JsInterop.AfterRenderCoupon();
+    }
+}

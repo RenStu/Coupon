@@ -1,0 +1,71 @@
+﻿@page "/offers"
+
+<div class="content px-4 col-xs-12 col-sm-8 col-md-8 col-sm-offset-2 col-md-offset-3">
+    <form id="offerForm" role="form">
+        <fieldset>
+            <h2>New Offer</h2>
+            <hr class="colorgraph">
+            <div class="form-group">
+                <input type="text" name="nameOffer" id="nameOffer" class="form-control input-lg" required placeholder="Name Offer">
+            </div>
+            <div class="form-group">
+                <button type="button" class="btn btn-outline-secondary docs-datepicker-trigger btn-calendar" disabled="">
+                    <i class="oi oi-calendar" aria-hidden="true"></i>
+                </button>
+                <input type="text" name="effectiveStartDate" id="effectiveStartDate" class="form-control input-lg" required placeholder="Effective Start Date">
+            </div>
+            <div class="form-group">
+                <button type="button" class="btn btn-outline-secondary docs-datepicker-trigger btn-calendar" disabled="">
+                    <i class="oi oi-calendar" aria-hidden="true"></i>
+                </button>
+                <input type="text" name="effectiveEndDate" id="effectiveEndDate" class="form-control input-lg" required placeholder="Effective End Date">
+            </div>
+        </fieldset>
+    </form>
+    <form id="productForm" role="form">
+        <fieldset style="padding-left: 20px;">
+            <legend>Product List:</legend>
+            <div class="form-group">
+                <input type="text" name="productName" id="productName" class="form-control input-lg" required placeholder="Product Name">
+            </div>
+            <div class="form-group">
+                <input type="number" name="productValue" id="productValue" class="form-control input-lg" required placeholder="Product Value">
+            </div>
+            <span class="button-checkbox">
+                <button type="button" class="btn btn-outline-info" data-color="info">Is Coupon</button>
+                <input type="checkbox" name="isCoupon" id="isCoupon" hidden>
+            </span>
+            <div class="form-group">
+                <input type="number" name="amountCoupon" id="amountCoupon" class="form-control input-lg" style="margin-top:5px;" placeholder="Amount Coupon">
+            </div>
+            <div class="form-group">
+                <div id="loader" style="text-align:center; display:none;">
+                    <label style="display:block;">Load images from Google Images</label>
+                    <div class="lds-ring"><div></div><div></div><div></div><div></div></div>
+                </div>
+                <select name="productImage" id="productImage" class="form-control input-lg" style="display:none"></select>
+            </div>
+            <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-12 text-right">
+                    <input type="button" id="addProduct" class="btn  btn-outline-primary" value="Add Product In Offer" disabled>
+                </div>
+            </div>
+            <div class="table-responsive" style="padding-top:15px">
+                <table class="table table-striped" style="width:100%" id="tableProductList"></table>
+            </div>
+            <div class="row" style="padding-top:30px">
+                <div class="col-xs-12 col-sm-12 col-md-12 text-right">
+                    <input type="button" id="saveOffer" class="btn btn-lg btn-primary btn-block" style="margin-bottom:30px" value="Save Offer">
+                </div>
+            </div>
+        </fieldset>
+    </form>
+</div>
+
+@functions{
+
+    protected override async Task OnAfterRenderAsync()
+    {
+        await WebApp.Client.Services.JsInterop.AfterRenderOffers();
+    }
+}

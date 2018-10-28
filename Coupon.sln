@@ -18,11 +18,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Itens", "Solution 
 		Solution Itens\local.ini = Solution Itens\local.ini
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Register", "Register\Register.csproj", "{70B9C90D-985A-4ED5-B4BE-E552CB463910}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Register", "Register\Register.csproj", "{70B9C90D-985A-4ED5-B4BE-E552CB463910}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PyGoogleImg", "PyGoogleImg\PyGoogleImg.csproj", "{7E465859-1F04-4E51-B9DD-409B09240F6C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PyGoogleImg", "PyGoogleImg\PyGoogleImg.csproj", "{7E465859-1F04-4E51-B9DD-409B09240F6C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Offers", "Offers\Offers.csproj", "{F315BEA1-402E-427D-96A0-C1B578C8AC54}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Offers", "Offers\Offers.csproj", "{F315BEA1-402E-427D-96A0-C1B578C8AC54}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

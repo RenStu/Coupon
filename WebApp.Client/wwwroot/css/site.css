@@ -121,3 +121,80 @@ app {
         display: block;
     }
 }
+
+.colorgraph {
+    height: 5px;
+    border-top: 0;
+    border-radius: 5px;
+    background-image: linear-gradient(45deg, rgb(42, 82, 158) 0%, #87289e 50%);
+}
+
+.td-vcenter {
+    vertical-align: middle !important;
+    text-align: center !important;
+}
+
+.td-no-padding {
+    padding: 0px !important;
+}
+
+th {
+    font-size: 90% !important;
+}
+
+td {
+    font-size: 70% !important;
+    vertical-align: middle !important;
+}
+
+.thumbnails li img {
+    width: 105px;
+}
+
+.lds-ring {
+    display: inline-block;
+    position: relative;
+    width: 64px;
+    height: 64px;
+}
+
+    .lds-ring div {
+        box-sizing: border-box;
+        display: block;
+        position: absolute;
+        width: 51px;
+        height: 51px;
+        margin: 6px;
+        border: 6px solid #87289e;
+        border-radius: 50%;
+        animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+        border-color: #87289e transparent transparent transparent;
+    }
+
+        .lds-ring div:nth-child(1) {
+            animation-delay: -0.45s;
+        }
+
+        .lds-ring div:nth-child(2) {
+            animation-delay: -0.3s;
+        }
+
+        .lds-ring div:nth-child(3) {
+            animation-delay: -0.15s;
+        }
+
+@keyframes lds-ring {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.btn-calendar {
+    z-index: 99999;
+    position: absolute;
+    right: 25px;
+}

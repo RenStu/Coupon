@@ -1,0 +1,45 @@
+﻿@page "/register"
+
+<div class="content px-4 col-xs-12 col-sm-8 col-md-6 col-sm-offset-2 col-md-offset-3">
+    <form role="form">
+        <fieldset>
+            <h2>Register</h2>
+            <hr class="colorgraph">
+            <div class="form-group">
+                <input type="email" name="email" id="email" class="form-control input-lg" required placeholder="Email Address">
+            </div>
+            <div class="form-group">
+                <input type="password" name="password" id="password" class="form-control input-lg" required placeholder="Password">
+            </div>
+            <div class="form-group">
+                <input type="password" name="confirmPassword" id="confirmPassword" class="form-control input-lg" required placeholder="Confirm Password">
+            </div>
+            <div class="form-group">
+                <input type="text" name="name" id="name" class="form-control input-lg" required placeholder="Name">
+            </div>
+            <div class="form-group">
+                <input type="text" name="location" id="location" class="form-control input-lg" required placeholder="Location">
+            </div>
+            <span class="button-checkbox">
+                <button type="button" class="btn btn-outline-info" data-color="info">Is Shopkeeper</button>
+                <input type="checkbox" name="isShopkeeper" id="isShopkeeper" hidden>
+            </span>
+            <div class="form-group">
+                <input type="text" name="shopName" id="shopName" class="form-control input-lg" placeholder="Shop Name" style="display:none; margin-top:5px;">
+            </div>
+            <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-12">
+                    <input type="button" id="register" class="btn btn-lg btn-primary btn-block" value="Register">
+                </div>
+            </div>
+        </fieldset>
+    </form>
+</div>
+
+@functions{
+
+    protected override async Task OnAfterRenderAsync()
+    {
+        await WebApp.Client.Services.JsInterop.AfterRenderRegister();
+    }
+}
