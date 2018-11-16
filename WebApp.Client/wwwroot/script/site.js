@@ -104,7 +104,6 @@ function UpdateComponentsOnLogin() {
             if (user != null) {
                 // synchronized user
                 showLogin(false);
-                showCouponsOffered();
             } else {
                 // unsynchronized user
                 showLogin(false);
@@ -122,13 +121,18 @@ function showLogin(show) {
         $('a[href="login"]').parent().hide();
         $('a[href="javascript:logout()"]').parent().show();
     }
+
+    showShopkeeper();
 }
 
-function showCouponsOffered() {
-    if (user.isShopkeeper)
+function showShopkeeper() {
+    if (user != null && user.isShopkeeper) {
         $('#couponOffered').show();
-    else
+        $('a[href="offers"]').parent().show();
+    } else {
         $('#couponOffered').hide();
+        $('a[href="offers"]').parent().hide();
+    }
 }
 
 function logout() {
