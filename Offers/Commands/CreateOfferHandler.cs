@@ -17,6 +17,7 @@ namespace Offers.Commands
         protected override void Handle(CreateOffer request)
         {
             var offerObj = JsonConvert.DeserializeObject<Offer>(JsonConvert.SerializeObject(request));
+            offerObj._id = Guid.NewGuid().ToString();
             offerObj.CqrsType = Cqrs.Query;
             offerObj.ListProduct.ToList().ForEach(x =>
             {

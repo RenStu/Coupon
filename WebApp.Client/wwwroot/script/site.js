@@ -5,25 +5,11 @@ init = function () {
     dataSet = null;
     dbChanges = null;
     user = null;
-
-    /*db.allDocs({
-        include_docs: true,
-        startkey: 'user',
-        endkey: 'user\ufff0'
-    }).then(function (result) {
-        console.log(result);
-        if (result.total_rows > 0)
-            syncWithRemoteDB(result.rows[0].doc.user, result.rows[0].doc.pass);
-    }).catch(function (err) {
-        console.log(err);
-    });*/
+    remoteDB = null;
 }
 
-//syncWithRemoteDB called init()
-// window.remoteDB 
-// window.sync
+//syncWithRemoteDB
 syncWithRemoteDB = function (user, pass) {
-
     remoteDB = new PouchDB('http://localhost:5984/userdb-' + user.convertToHex(), {
         skipSetup: true,
         auth: {
@@ -78,9 +64,155 @@ HttpCodes = {
     notFound: 404
 };
 
+//function should called in all afterRender function
+userAndSync = function () {
+    db.allDocs({
+        include_docs: true,
+        startkey: 'org.couchdb.user',
+        endkey: 'org.couchdb.user\ufff0'
+    }).then(function (result) {
+        console.log(result);
+        if (result.total_rows > 0) {
+            user = result.rows[0].doc;
+            if (sync == null)
+                syncWithRemoteDB(user.email, user.password);
+        }
+    }).catch(function (err) {
+        console.log(err);
+    });
+
+    UpdateComponentsOnLogin();
+}
+
+function UpdateComponentsOnLogin() {
+    if (remoteDB == null) {
+        showLogin(true);
+        return;
+    }
+    remoteDB.getSession(function (err, response) {
+        if (err || !response.userCtx.name) {
+
+            if (user == null) {
+                // nobody's logged in
+                showLogin(true);
+            } else {
+                // unconnected user 
+                showLogin(false);
+            }
+        } else {
+            // connected user -> response.userCtx.name  
+            if (user != null) {
+                // synchronized user
+                showLogin(false);
+                showCouponsOffered();
+            } else {
+                // unsynchronized user
+                showLogin(false);
+            }
+        }
+    });
+}
+
+function showLogin(show) {
+    if (show) {
+        $('a[href="login"]').parent().show();
+        $('a[href="javascript:logout()"]').parent().hide();
+
+    } else {
+        $('a[href="login"]').parent().hide();
+        $('a[href="javascript:logout()"]').parent().show();
+    }
+}
+
+function showCouponsOffered() {
+    if (user.isShopkeeper)
+        $('#couponOffered').show();
+    else
+        $('#couponOffered').hide();
+}
+
+function logout() {
+    remoteDB.logOut(function (err, response) {
+        if (err) {
+            return;
+        }
+        db.destroy().then(function (response) {
+            dataSet = null;
+            dbChanges = null;
+            user = null;
+            sync = null;
+        }).catch(function (err) {
+            console.log(err);
+        });
+
+        UpdateComponentsOnLogin();
+    });
+    remoteDB = null;
+}
+
+function login() {
+    $('#btnLogin').click((event) => {
+        event.preventDefault();
+        if ($('form').valid()) {
+            syncWithRemoteDB($('#email').val(), $('#password').val());
+            UpdateComponentsOnLogin();
+
+            remoteDB.getSession(function (err, response) {
+                if (err || !response.userCtx.name) {
+                    // nobody's logged in
+                    toastr.warning("login failed");
+                } else {
+                    // logged
+                    toastr.success("user logged");
+                    window.location.pathname = '/';
+                }
+            });
+        }
+    });
+
+}
+
+function register() {
+    $('#btnRegister').click((event) => {
+        event.preventDefault();
+        if ($('form').valid()) {
+            var createUser = {
+                _id: "org.couchdb.user:" + $('#email').val(),
+                name: $('#email').val(),
+                email: $('#email').val(),
+                password: $('#password').val(),
+                location: $('#location').val(),
+                roles: [],
+                isShopkeeper: $('input:checkbox').is(':checked'),
+                shopName: $('#shopName').val()
+            };
+
+            var command = {
+                service: "Register",
+                commandName: "Commands.CreateUser",
+                commandJSON: JSON.stringify(createUser),
+                type: "Command",
+            };
+
+            $.post("http://localhost:8712/Register", command)
+                .done(function (data) {
+                    toastr.success("user created");
+                    syncWithRemoteDB(createUser.Email, createUser.Password);
+                    UpdateComponentsOnLogin();
+                })
+                .fail(function () {
+                    toastr.error("error creating user");
+                });
+        }
+    });
+}
+
+
+
 //###########################################################################################################################################################################
 //afterRenderIndex called OnAfterRenderAsync() of de page Index in Blazor
 afterRenderIndex = function () {
+    userAndSync();
 
     tableOffers = $('#tableOffers').DataTable({
         order: [[1, 'asc']],
@@ -158,8 +290,6 @@ afterRenderIndex = function () {
     }
 
     function initialize() {
-        if (user == null)
-            dataSet.map((obj) => { if (obj.doc.cqrsType == "query" && obj.doc.type == "CreateUser") user = obj.doc; });
 
         productsGrid = [];
         dataSet.map((obj) => {
@@ -197,6 +327,8 @@ afterRenderIndex = function () {
 
 //afterRenderOffers called OnAfterRenderAsync() of de page Offers in Blazor
 afterRenderOffers = function () {
+    userAndSync();
+
     $('.button-checkbox').each(function () {
         var $widget = $(this),
             $button = $widget.find('button'),
@@ -426,6 +558,8 @@ afterRenderOffers = function () {
 
 //afterRenderRegister called OnAfterRenderAsync() of de page Register in Blazor
 afterRenderRegister = function () {
+    userAndSync();
+
     $('.button-checkbox').each(function () {
         var $widget = $(this),
             $button = $widget.find('button'),
@@ -491,6 +625,8 @@ afterRenderRegister = function () {
 
 //afterRenderCoupon called OnAfterRenderAsync() of de page Coupon in Blazor
 afterRenderCoupon = function () {
+    userAndSync();
+
     tableCouponsOffered = $('#tableCouponsOffered').DataTable({
         order: [[1, 'asc']],
         columns: [
@@ -697,8 +833,6 @@ afterRenderCoupon = function () {
     }
 
     function initialize() {
-        if (user == null)
-            dataSet.map((obj) => { if (obj.doc.cqrsType == "query" && obj.doc.type == "CreateUser") user = obj.doc; });
 
         productsGridOffered = [];
         dataSet.map((obj) => {
