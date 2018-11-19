@@ -424,7 +424,7 @@ afterRenderOffers = function () {
 
         $(loader).hide();
         $(addProduct).prop('disabled', false);
-        googleSearchImg.images.map((imageUrl, index) => {
+        googleSearchImg.listUrlImages.map((imageUrl, index) => {
             $(productImage).append(`<option data-img-src="${imageUrl}" value="${index}" ${index == 0 ? "selected" : ""}>${index}<\/option>`);
         });
         $(productImage).imagepicker();
