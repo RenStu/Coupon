@@ -14,7 +14,7 @@ spiegel install - em ambiente de desenvolvimento
 	  "type": "on_change",
 	  "db_name": "^userdb-.+",
 	  "if": {
-		"Type": "^command"
+		"type": "^command"
 	  },
 	  "url": "http://admin@localhost:8712/api/cmd",
 	  "params": {

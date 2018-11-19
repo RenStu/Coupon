@@ -6,6 +6,7 @@ init = function () {
     dbChanges = null;
     user = null;
     remoteDB = null;
+    sync = null;
 }
 
 //syncWithRemoteDB
@@ -29,6 +30,7 @@ syncWithRemoteDB = function (user, pass) {
     remoteDB.login(user, pass,
     {
         ajax: {
+            skipSetup: true,
             cache: false,
             timeout: 30000
         }
@@ -176,41 +178,15 @@ function login() {
 
 }
 
-function register() {
-    $('#btnRegister').click((event) => {
-        event.preventDefault();
-        if ($('form').valid()) {
-            var createUser = {
-                _id: "org.couchdb.user:" + $('#email').val(),
-                name: $('#email').val(),
-                email: $('#email').val(),
-                password: $('#password').val(),
-                location: $('#location').val(),
-                roles: [],
-                isShopkeeper: $('input:checkbox').is(':checked'),
-                shopName: $('#shopName').val()
-            };
-
-            var command = {
-                service: "Register",
-                commandName: "Commands.CreateUser",
-                commandJSON: JSON.stringify(createUser),
-                type: "Command",
-            };
-
-            $.post("http://localhost:8712/Register", command)
-                .done(function (data) {
-                    toastr.success("user created");
-                    syncWithRemoteDB(createUser.Email, createUser.Password);
-                    UpdateComponentsOnLogin();
-                })
-                .fail(function () {
-                    toastr.error("error creating user");
-                });
-        }
+$.postJSON = function (url, data) {
+    return jQuery.ajax({
+        'type': 'POST',
+        'url': url,
+        'contentType': 'application/json',
+        'data': JSON.stringify(data),
+        'dataType': 'json'
     });
-}
-
+};
 
 
 //###########################################################################################################################################################################
@@ -254,7 +230,7 @@ afterRenderIndex = function () {
             service: "Offers",
             commandName: "Commands.RequestCoupon",
             commandJSON: JSON.stringify(requestCoupon),
-            Type: "Command",
+            type: "command",
         };
 
         command._id = sha256(JSON.stringify(command));
@@ -505,7 +481,7 @@ afterRenderOffers = function () {
             service: "PyGoogleImg",
             commandName: "Commands.GoogleSearch",
             commandJSON: JSON.stringify(googleSearch),
-            Type: "Command",
+            type: "command",
         };
 
         db.post(command).then(function (response) {
@@ -536,7 +512,7 @@ afterRenderOffers = function () {
                     service: "Offers",
                     commandName: "Commands.CreateOffer",
                     commandJSON: JSON.stringify(createOffer),
-                    Type: "Command",
+                    type: "command",
                 };
 
                 command._id = sha256(JSON.stringify(command));
@@ -622,8 +598,37 @@ afterRenderRegister = function () {
         init();
     });
 
-    $(register).click(() => {
-        toastr.warning("register function");
+    $('#btnRegister').click((event) => {
+        event.preventDefault();
+        if ($('form').valid()) {
+            var createUser = {
+                _id: "org.couchdb.user:" + $('#email').val(),
+                name: $('#email').val(),
+                email: $('#email').val(),
+                password: $('#password').val(),
+                location: $('#location').val(),
+                roles: [],
+                isShopkeeper: $('input:checkbox').is(':checked'),
+                shopName: $('#shopName').val()
+            };
+
+            var command = {
+                service: "Register",
+                commandName: "Commands.CreateUser",
+                commandJSON: JSON.stringify(createUser),
+                type: "command",
+            };
+
+            $.postJSON("http://localhost:8712/api/register", { change: command })
+                .done(function () {
+                    toastr.success("user created");
+                    syncWithRemoteDB(createUser.email, createUser.password);
+                    window.location.pathname = '/';
+                })
+                .fail(function () {
+                    toastr.error("error creating user");
+                });
+        }
     });
 }
 
@@ -682,7 +687,7 @@ afterRenderCoupon = function () {
             service: "Offers",
             commandName: "Commands.InStock",
             commandJSON: JSON.stringify(inStock),
-            Type: "Command",
+            type: "command",
         };
 
         command._id = sha256(JSON.stringify(command));
@@ -709,7 +714,7 @@ afterRenderCoupon = function () {
             service: "Offers",
             commandName: "Commands.FinishedStock",
             commandJSON: JSON.stringify(finishedStock),
-            Type: "Command",
+            type: "command",
         };
 
         command._id = sha256(JSON.stringify(command));
@@ -736,7 +741,7 @@ afterRenderCoupon = function () {
             service: "Offers",
             commandName: "Commands.Delivered",
             commandJSON: JSON.stringify(delivered),
-            Type: "Command",
+            type: "command",
         };
 
         command._id = sha256(JSON.stringify(command));
@@ -763,7 +768,7 @@ afterRenderCoupon = function () {
             service: "Offers",
             commandName: "Commands.Cancelled",
             commandJSON: JSON.stringify(cancelled),
-            Type: "Command",
+            type: "command",
         };
 
         command._id = sha256(JSON.stringify(command));
