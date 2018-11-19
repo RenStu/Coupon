@@ -7,6 +7,7 @@ init = function () {
     user = null;
     remoteDB = null;
     sync = null;
+    syncing = false;
 }
 
 //syncWithRemoteDB
@@ -26,32 +27,31 @@ syncWithRemoteDB = function (user, pass) {
         }
     });
 
-    var error = false;
+    syncing = true;
     remoteDB.login(user, pass,
-    {
-        ajax: {
-            skipSetup: true,
-            cache: false,
-            timeout: 30000
-        }
-    })
-    .then(() => {
-        sync = db.sync(remoteDB, {
-            live: true,
-            retry: true,
+        {
+            ajax: {
+                skipSetup: true,
+                cache: false,
+                timeout: 30000
+            }
         })
-        .on('denied', (err) => {
-            error = true;
-            console.log('[Database::syncWithRemoteDB()]: Error (1):' + JSON.stringify(err));
-        })
-        .on('error', (err) => {
-            error = true;
-            console.log('[Database::syncWithRemoteDB()]: Error (2):' + JSON.stringify(err));
-        })
-    });
-
-    if (error)
-        sync = null;
+        .then(() => {
+            sync = db.sync(remoteDB, {
+                live: true,
+                retry: true,
+            })
+                .on('denied', (err) => {
+                    sync = null;
+                    syncing = false;
+                    console.log('[Database::syncWithRemoteDB()]: Error (1):' + JSON.stringify(err));
+                })
+                .on('error', (err) => {
+                    sync = null;
+                    syncing = false;
+                    console.log('[Database::syncWithRemoteDB()]: Error (2):' + JSON.stringify(err));
+                })
+        });
 }
 
 
@@ -76,42 +76,43 @@ userAndSync = function () {
         console.log(result);
         if (result.total_rows > 0) {
             user = result.rows[0].doc;
-            if (sync == null)
+            if (!syncing)
                 syncWithRemoteDB(user.email, user.password);
+
         }
+        UpdateComponentsOnLogin();
+
     }).catch(function (err) {
         console.log(err);
     });
-
-    UpdateComponentsOnLogin();
 }
 
 function UpdateComponentsOnLogin() {
-    if (remoteDB == null) {
-        showLogin(true);
-        return;
-    }
-    remoteDB.getSession(function (err, response) {
-        if (err || !response.userCtx.name) {
+    try {
+        remoteDB.getSession(function (err, response) {
+            if (err || !response.userCtx.name) {
 
-            if (user == null) {
-                // nobody's logged in
-                showLogin(true);
+                if (user == null) {
+                    // nobody's logged in
+                    showLogin(true);
+                } else {
+                    // unconnected user 
+                    showLogin(false);
+                }
             } else {
-                // unconnected user 
-                showLogin(false);
+                // connected user -> response.userCtx.name  
+                if (user != null) {
+                    // synchronized user
+                    showLogin(false);
+                } else {
+                    // unsynchronized user
+                    showLogin(false);
+                }
             }
-        } else {
-            // connected user -> response.userCtx.name  
-            if (user != null) {
-                // synchronized user
-                showLogin(false);
-            } else {
-                // unsynchronized user
-                showLogin(false);
-            }
-        }
-    });
+        });
+    } catch (err) {
+        showLogin(true);
+    }
 }
 
 function showLogin(show) {
@@ -147,6 +148,7 @@ function logout() {
             dbChanges = null;
             user = null;
             sync = null;
+            syncing = false;
         }).catch(function (err) {
             console.log(err);
         });
@@ -154,28 +156,6 @@ function logout() {
         UpdateComponentsOnLogin();
     });
     remoteDB = null;
-}
-
-function login() {
-    $('#btnLogin').click((event) => {
-        event.preventDefault();
-        if ($('form').valid()) {
-            syncWithRemoteDB($('#email').val(), $('#password').val());
-            UpdateComponentsOnLogin();
-
-            remoteDB.getSession(function (err, response) {
-                if (err || !response.userCtx.name) {
-                    // nobody's logged in
-                    toastr.warning("login failed");
-                } else {
-                    // logged
-                    toastr.success("user logged");
-                    window.location.pathname = '/';
-                }
-            });
-        }
-    });
-
 }
 
 $.postJSON = function (url, data) {
@@ -521,10 +501,9 @@ afterRenderOffers = function () {
                 db.get(command._id).then(function (doc) {
                     toastr.info("command already sent!");
                 }).catch(function (err) {
-                    if (err.status == HttpCodes.notFound)
-                    {
+                    if (err.status == HttpCodes.notFound) {
                         db.put(command).then(function (response) {
-                          console.log(response);
+                            console.log(response);
                         });
                     }
                 });
@@ -623,7 +602,7 @@ afterRenderRegister = function () {
                 .done(function () {
                     toastr.success("user created");
                     syncWithRemoteDB(createUser.email, createUser.password);
-                    window.location.pathname = '/';
+                    window.location.pathname = '/index';
                 })
                 .fail(function () {
                     toastr.error("error creating user");
@@ -913,5 +892,22 @@ afterRenderCoupon = function () {
 
 //afterRenderLogin called OnAfterRenderAsync() of de page Login in Blazor
 afterRenderLogin = function () {
+    $('#btnLogin').click((event) => {
+        event.preventDefault();
+        if ($('form').valid()) {
+            syncWithRemoteDB($('#email').val(), $('#password').val());
+            UpdateComponentsOnLogin();
 
+            remoteDB.getSession(function (err, response) {
+                if (err || !response.userCtx.name) {
+                    // nobody's logged in
+                    toastr.warning("login failed");
+                } else {
+                    // logged
+                    toastr.success("user logged");
+                    window.location.pathname = '/index';
+                }
+            });
+        }
+    });
 }
