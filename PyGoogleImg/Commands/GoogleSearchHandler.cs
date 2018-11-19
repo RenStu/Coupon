@@ -82,6 +82,7 @@ main(argv)
             } else {
                 var googleSearchImgObj = new GoogleSearchImg();
                 googleSearchImgObj._id = "googleSearchImg";
+                googleSearchImgObj.Search = request.Search;
                 googleSearchImgObj.DbName = request.DbName;
                 googleSearchImgObj.CqrsType = Cqrs.Query;
                 googleSearchImgObj.ListUrlImages = list.ToArray();

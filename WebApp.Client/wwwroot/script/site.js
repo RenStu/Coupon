@@ -129,7 +129,7 @@ function showLogin(show) {
 }
 
 function showShopkeeper() {
-    if (user != null && user.isShopkeeper) {
+    if (user == null || user.isShopkeeper) {
         $('#couponOffered').show();
         $('a[href="offers"]').parent().show();
     } else {
@@ -167,6 +167,10 @@ $.postJSON = function (url, data) {
         'dataType': 'json'
     });
 };
+
+function toHome() {
+    $('#indexLink')[0].click();
+}
 
 
 //###########################################################################################################################################################################
@@ -465,7 +469,7 @@ afterRenderOffers = function () {
         };
 
         db.post(command).then(function (response) {
-            //console.log(response);
+            console.log(response);
         });
 
         $(addProduct).prop('disabled', true);
@@ -602,7 +606,7 @@ afterRenderRegister = function () {
                 .done(function () {
                     toastr.success("user created");
                     syncWithRemoteDB(createUser.email, createUser.password);
-                    window.location.pathname = '/index';
+                    toHome();
                 })
                 .fail(function () {
                     toastr.error("error creating user");
@@ -893,7 +897,6 @@ afterRenderCoupon = function () {
 //afterRenderLogin called OnAfterRenderAsync() of de page Login in Blazor
 afterRenderLogin = function () {
     $('#btnLogin').click((event) => {
-        event.preventDefault();
         if ($('form').valid()) {
             syncWithRemoteDB($('#email').val(), $('#password').val());
             UpdateComponentsOnLogin();
@@ -905,7 +908,7 @@ afterRenderLogin = function () {
                 } else {
                     // logged
                     toastr.success("user logged");
-                    window.location.pathname = '/index';
+                    toHome();
                 }
             });
         }
