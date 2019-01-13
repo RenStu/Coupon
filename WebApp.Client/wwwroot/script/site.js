@@ -198,11 +198,11 @@ afterRenderIndex = function () {
         order: [[1, 'asc']],
         columns: [
             {
-                target: 0, title: "Product", width: "10%", "orderable": false, className: "td-vcenter td-no-padding", render: function (data, type, row, meta) {
+                target: 0, title: "Product", width: "10%", "orderable": false, className: "td-vcenter td-no-padding image-width", render: function (data, type, row, meta) {
                     return "<img src='" + row.image + "' style='width:100%; min-width:30px;'>";
                 }
             },
-            { title: "", data: "name", render: function (data, type, row, meta) { return `${row.name} <br> ${row.shopName} - ${row.offerName}` } },
+            { title: "&nbsp;", data: "name", render: function (data, type, row, meta) { return `${row.name} <br> ${row.shopName} - ${row.offerName}` } },
             { title: "Value", width: "25%", data: "value", render: function (data, type, row, meta) { return `${row.value} <br> ${row.remainingCoupon} of  ${row.amountCoupon} - until ${moment(row.endDate.substr(0, 10), 'YYYY-MM-DD').format('YYYY-MM-DD')}` } },
             {
                 target: -1, title: '<span class="oi oi-command" title="Commands"></span>', width: "10%", data: "couponAvailable", createdCell: function (td, cellData, rowData, row, col) {
@@ -274,7 +274,7 @@ afterRenderIndex = function () {
         productsGrid = [];
         dataSet.map((obj) => {
             var doc = obj.doc;
-            if (doc.cqrsType == "query" && doc.type == "CreateOffer" && moment() > moment(doc.effectiveEndDate.substr(0, 10), 'YYYY-MM-DD')) {
+            if (doc.cqrsType == "query" && doc.type == "CreateOffer" && moment() < moment(doc.effectiveEndDate.substr(0, 10), 'YYYY-MM-DD')) {
                 var offer = doc;
                 offer.listProduct.map((product) => {
                     var productItem = new Object();
@@ -375,11 +375,11 @@ afterRenderOffers = function () {
         searching: false,
         columns: [
             {
-                target: 0, title: "Product", width: "10%", orderable: false, className: "td-vcenter td-no-padding", render: function (data, type, row, meta) {
+                target: 0, title: "Product", width: "10%", orderable: false, className: "td-vcenter td-no-padding image-width", render: function (data, type, row, meta) {
                     return "<img src='" + row.image + "' style='width:100%; min-width:30px;'>";
                 }
             },
-            { title: "", data: "name", render: function (data, type, row, meta) { return `${row.name} <br> ${row.shopName} - ${row.offerName}` } },
+            { title: "&nbsp;", data: "name", render: function (data, type, row, meta) { return `${row.name} <br> ${row.shopName} - ${row.offerName}` } },
             { title: "Value", width: "25%", data: "value", render: function (data, type, row, meta) { return row.value + (row.isCoupon ? '<br> Coupon: ' + row.amountCoupon : '') } },
             {
                 target: -1, title: '<span class="oi oi-command" title="Commands"></span>', width: "25%", orderable: false, data: null, createdCell: function (td, cellData, rowData, row, col) {
@@ -640,11 +640,11 @@ afterRenderCoupon = function () {
         order: [[1, 'asc']],
         columns: [
             {
-                target: 0, title: "Product", width: "10%", orderable: false, className: "td-vcenter td-no-padding", render: function (data, type, row, meta) {
+                target: 0, title: "Product", width: "10%", orderable: false, className: "td-vcenter td-no-padding image-width", render: function (data, type, row, meta) {
                     return "<img src='" + row.image + "' style='width:100%; min-width:30px;'>";
                 }
             },
-            { title: "", data: "name", render: function (data, type, row, meta) { return `${row.name} <br> ${row.shopName} - ${row.offerName}` } },
+            { title: "&nbsp;", data: "name", render: function (data, type, row, meta) { return `${row.name} <br> ${row.shopName} - ${row.offerName}` } },
             { title: "User", width: "25%", data: "value", render: function (data, type, row, meta) { return `${row.value} <br> ${row.userEmail} - until ${moment(row.endDate.substr(0, 10), 'YYYY-MM-DD').format('YYYY-MM-DD')}` } },
             {
                 target: -1, title: '<span class="oi oi-command" title="Commands"></span>', width: "25%", orderable: false, data: null, createdCell: function (td, cellData, rowData, row, col) {
@@ -787,11 +787,11 @@ afterRenderCoupon = function () {
         order: [[1, 'asc']],
         columns: [
             {
-                target: 0, title: "Product", width: "10%", orderable: false, className: "td-vcenter td-no-padding", render: function (data, type, row, meta) {
+                target: 0, title: "Product", width: "10%", orderable: false, className: "td-vcenter td-no-padding image-width", render: function (data, type, row, meta) {
                     return "<img src='" + row.image + "' style='width:100%; min-width:30px;'>";
                 }
             },
-            { title: "", data: "name", render: function (data, type, row, meta) { return `${row.name} <br> ${row.shopName} - ${row.offerName}` } },
+            { title: "&nbsp;", data: "name", render: function (data, type, row, meta) { return `${row.name} <br> ${row.shopName} - ${row.offerName}` } },
             { title: "Value", width: "25%", data: "value", render: function (data, type, row, meta) { return `${row.value} <br> Until ${moment(row.endDate.substr(0, 10), 'YYYY-MM-DD').format('YYYY-MM-DD')}` } },
             {
                 target: -1, title: '<span class="oi oi-command" title="Commands"></span>', width: "25%", orderable: false, data: null, createdCell: function (td, cellData, rowData, row, col) {
