@@ -76,12 +76,14 @@ main(argv)
             var googleSearchImg = dbUser.GetAsync("googleSearchImg").Result;
             if (googleSearchImg.StatusCode == System.Net.HttpStatusCode.OK) {
                 var googleSearchImgObj = JsonConvert.DeserializeObject<GoogleSearchImg>(googleSearchImg.Content);
+                googleSearchImgObj.Search = request.Search;
                 googleSearchImgObj.ListUrlImages = list.ToArray();
                 var result = dbUser.ForceUpdateAsync(JToken.FromObject(googleSearchImgObj)).Result;
                 return result.StatusCode;
             } else {
                 var googleSearchImgObj = new GoogleSearchImg();
                 googleSearchImgObj._id = "googleSearchImg";
+                googleSearchImgObj.Search = request.Search;
                 googleSearchImgObj.DbName = request.DbName;
                 googleSearchImgObj.CqrsType = Cqrs.Query;
                 googleSearchImgObj.ListUrlImages = list.ToArray();

@@ -6,6 +6,8 @@ namespace Shared
 {
     public class GoogleSearchImg : BaseDocument
     {
+        public string Search { get; set; }
+
         public string[] ListUrlImages { get; set; }
     }
 }
