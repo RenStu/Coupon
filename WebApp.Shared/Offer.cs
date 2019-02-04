@@ -18,6 +18,10 @@ namespace Shared
 
         public DateTime EffectiveEndDate { get; set; }
 
+        public string ShopName { get; set; }
+
+        public string UserShopEmail { get; set; }
+
         public ICollection<Product> ListProduct { get; set; }
     }
 }

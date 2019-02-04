@@ -14,7 +14,7 @@ namespace Shared
 
         public string Type
         {
-            get { return string.IsNullOrEmpty(_Type) ? this.GetType().Name : _Type; }
+            get { return this.GetType().Name; }
             set { _Type = value; }
         }
 

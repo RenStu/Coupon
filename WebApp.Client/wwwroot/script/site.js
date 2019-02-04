@@ -129,7 +129,7 @@ function showLogin(show) {
 }
 
 function showShopkeeper() {
-    if (user == null || user.isShopkeeper) {
+    if (user != null && user.isShopkeeper) {
         $('#couponOffered').show();
         $('a[href="offers"]').parent().show();
     } else {
@@ -258,28 +258,30 @@ afterRenderIndex = function () {
         productsGrid = [];
         dataSet.map((obj) => {
             var doc = obj.doc;
-            if (doc.cqrsType == "query" && doc.type == "CreateOffer" && moment() < moment(doc.effectiveEndDate.substr(0, 10), 'YYYY-MM-DD')) {
+            if (doc.cqrsType == "query" && doc.type == "Offer" && moment() < moment(doc.effectiveEndDate.substr(0, 10), 'YYYY-MM-DD')) {
                 var offer = doc;
                 offer.listProduct.map((product) => {
-                    var productItem = new Object();
-                    productItem.offerId = offer._id;
-                    productItem.productGuid = product.guid;
-                    productItem.shopName = offer.shopName;
-                    productItem.image = product.image;
-                    productItem.name = product.name;
-                    productItem.offerName = offer.name;
-                    productItem.isCoupon = product.isCoupon;
-                    productItem.value = '$' + product.value.toFixed(2).replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,");
-                    productItem.amountCoupon = product.amountCoupon;
-                    productItem.remainingCoupon = product.remainingCoupon;
-                    productItem.endDate = offer.effectiveEndDate;
-                    productItem.userCoupon = null;
-                    product.listUserCoupon.map((userCoupon) => {
-                        if (userCoupon.userEmail.toLowerCase() == user.email.toLowerCase())
-                            productItem.userCoupon = userCoupon;
-                    });
-                    productItem.couponAvailable = productItem.isCoupon && productItem.userCoupon == null && productItem.remainingCoupon > 0;
-                    productsGrid.push(productItem);
+                    if (offer.userShopEmail.toLowerCase() != user.email.toLowerCase()) {
+                        var productItem = new Object();
+                        productItem.offerId = offer._id;
+                        productItem.productGuid = product.guid;
+                        productItem.shopName = offer.shopName;
+                        productItem.image = product.image;
+                        productItem.name = product.name;
+                        productItem.offerName = offer.name;
+                        productItem.isCoupon = product.isCoupon;
+                        productItem.value = '$' + product.value.toFixed(2).replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,");
+                        productItem.amountCoupon = product.amountCoupon;
+                        productItem.remainingCoupon = product.remainingCoupon;
+                        productItem.endDate = offer.effectiveEndDate;
+                        productItem.userCoupon = null;
+                        product.listUserCoupon.map((userCoupon) => {
+                            if (userCoupon.userEmail.toLowerCase() == user.email.toLowerCase())
+                                productItem.userCoupon = userCoupon;
+                        });
+                        productItem.couponAvailable = productItem.isCoupon && productItem.userCoupon == null && productItem.remainingCoupon > 0;
+                        productsGrid.push(productItem);
+                    }
                 });
             }
         });
@@ -378,9 +380,9 @@ afterRenderOffers = function () {
             tableProductList.row.add({
                 image: $($("#productImage option:selected")[0]).data("img-src"),
                 name: $('#productName').val(),
-                value: '$' + parseFloat($('#productValue').val()).toFixed(2).replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,"),
+                value: parseFloat($('#productValue').val()).toFixed(2).replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,"),
                 offerName: $('#nameOffer').val(),
-                shopName: "Mudar",
+                shopName: user.shopName,
                 isCoupon: $('#isCoupon').is(':checked'),
                 amountCoupon: $('#isCoupon').is(':checked') ? $('#amountCoupon').val() : 0
             }).draw();
@@ -459,7 +461,7 @@ afterRenderOffers = function () {
 
     $(productName).blur(() => {
         var googleSearch = {
-            Search: $('#productName').val()
+            search: $('#productName').val()
         };
         var command = {
             service: "PyGoogleImg",
@@ -472,9 +474,14 @@ afterRenderOffers = function () {
             console.log(response);
         });
 
-        $(addProduct).prop('disabled', true);
-
-        //console.log(command);
+        //limpar lista de produtos
+        if ($(productImage).data('picker')) {
+            $(productImage).data('picker').destroy();
+            $(productImage).find('option').remove()
+            $('.image_picker_selector').empty()
+            $(productImage).hide();
+            $(addProduct).prop('disabled', true);
+        }
 
         $(loader).show();
     });
@@ -484,7 +491,7 @@ afterRenderOffers = function () {
         if ($('#offerForm').valid()) {
             if (products.length > 0) {
                 var createOffer = {
-                    name: $('#productName').val(),
+                    name: $('#nameOffer').val(),
                     location: user.location,
                     shopName: user.shopName,
                     userShopEmail: user.email,
@@ -659,12 +666,12 @@ afterRenderCoupon = function () {
     });
 
     $('#tableCouponsOffered tbody').on('click', '#btnInStock', function () {
-        var data = tableOffers.row($(this).parents('tr')).data();
+        var data = tableCouponsOffered.row($(this).parents('tr')).data();
 
         var inStock = {
             idOffer: data.offerId,
             guidProduct: data.productGuid,
-            userEmail: user.email
+            userEmail: data.userEmail
         };
         var command = {
             service: "Offers",
@@ -686,12 +693,12 @@ afterRenderCoupon = function () {
     });
 
     $('#tableCouponsOffered tbody').on('click', '#btnOutOfStock', function () {
-        var data = tableOffers.row($(this).parents('tr')).data();
+        var data = tableCouponsOffered.row($(this).parents('tr')).data();
 
         var finishedStock = {
             idOffer: data.offerId,
             guidProduct: data.productGuid,
-            userEmail: user.email
+            userEmail: data.userEmail
         };
         var command = {
             service: "Offers",
@@ -713,12 +720,12 @@ afterRenderCoupon = function () {
     });
 
     $('#tableCouponsOffered tbody').on('click', '#btnIsDelivered', function () {
-        var data = tableOffers.row($(this).parents('tr')).data();
+        var data = tableCouponsOffered.row($(this).parents('tr')).data();
 
         var delivered = {
             idOffer: data.offerId,
             guidProduct: data.productGuid,
-            userEmail: user.email
+            userEmail: data.userEmail
         };
         var command = {
             service: "Offers",
@@ -740,12 +747,12 @@ afterRenderCoupon = function () {
     });
 
     $('#tableCouponsOffered tbody').on('click', '#btnIsCancelled', function () {
-        var data = tableOffers.row($(this).parents('tr')).data();
+        var data = tableCouponsOffered.row($(this).parents('tr')).data();
 
         var cancelled = {
             idOffer: data.offerId,
             guidProduct: data.productGuid,
-            userEmail: user.email
+            userEmail: data.userEmail
         };
         var command = {
             service: "Offers",
@@ -829,7 +836,7 @@ afterRenderCoupon = function () {
         productsGridOffered = [];
         dataSet.map((obj) => {
             var doc = obj.doc;
-            if (doc.cqrsType == "query" && doc.type == "CreateOffer") {
+            if (doc.cqrsType == "query" && doc.type == "Offer") {
                 var offer = doc;
                 offer.listProduct.map((product) => {
                     if (offer.userShopEmail.toLowerCase() == user.email.toLowerCase()) {
@@ -860,7 +867,7 @@ afterRenderCoupon = function () {
         myProductsGrid = [];
         dataSet.map((obj) => {
             var doc = obj.doc;
-            if (doc.cqrsType == "query" && doc.type == "CreateOffer") {
+            if (doc.cqrsType == "query" && doc.type == "Offer") {
                 var offer = doc;
                 offer.listProduct.map((product) => {
                     product.listUserCoupon.map((userCoupon) => {

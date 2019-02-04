@@ -43,7 +43,7 @@ namespace Offers.Commands
 
                 foreach (var user in users)
                 {
-                    if (!user.Email.Equals(request.UserEmail, StringComparison.InvariantCultureIgnoreCase))
+                    if (!user.Email.Equals(offer.UserShopEmail, StringComparison.InvariantCultureIgnoreCase))
                     {
                         userDB_ = new CouchClient(Couch.EndPoint).GetDatabaseAsync(user.DbName).Result;
                         userDB_.ForceUpdateAsync(JToken.FromObject(offer));
