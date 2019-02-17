@@ -25,7 +25,7 @@ Visçao geral dos componetes do sistema:
 
 ```
 1. Server
-   1. 1. Cluster Service Fabric (Obs.: PyGoogleImg é um serviço distribuído se scraping em Python)
+   1. 1. Cluster Service Fabric (Obs.: PyGoogleImg é um serviço distribuído de scraping ao Google Images em Python)
    1. 2. Cluster Spiegel
    1. 3. Cluster CouchDB
 
