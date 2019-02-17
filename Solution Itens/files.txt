@@ -27,5 +27,5 @@ spiegel install - em ambiente de desenvolvimento
 	}
 	
 	- spiegel --type="update-listener" --url="http://admin:passw0rd@localhost:5984"
-	- spiegel --type="change-listener" --url="http://admin:passw0rd@localhost:5984" --passwords-file="C:\Users\Top\source\repos\Coupon\Solution Itens\change-listener-pass.json"
+	- spiegel --type="change-listener" --url="http://admin:passw0rd@localhost:5984" --passwords-file="[FULL PATH]\change-listener-pass.json"
 
